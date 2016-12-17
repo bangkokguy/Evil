@@ -1,0 +1,94 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/pref_header_general">
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="start_on_boot"
+            android:summary="@string/start_on_boot"
+            android:title="@string/start_on_boot" />
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/bar_layout">
+
+        <ListPreference
+            android:defaultValue="16"
+            android:summary="@string/pref_bar_thickness"
+            android:entries="@array/pref_bar_thickness_titles"
+            android:entryValues="@array/pref_bar_thickness_values"
+            android:key="bar_thickness"
+            android:negativeButtonText="@null"
+            android:positiveButtonText="@null"
+            android:title="@string/pref_bar_thickness" />
+    </PreferenceCategory>
+
+
+    <PreferenceCategory
+        android:title="@string/info_in_the_message">
+
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="battery_percent"
+            android:summary="@string/battery_percent"
+            android:title="@string/battery_percent" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="battery_temperature"
+            android:summary="@string/battery_temperature"
+            android:title="@string/battery_temperature" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="battery_health"
+            android:summary="@string/battery_health"
+            android:title="@string/battery_health" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="battery_status"
+            android:summary="@string/battery_status"
+            android:title="@string/battery_status" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="battery_power_source"
+            android:summary="@string/battery_power_source"
+            android:title="@string/battery_power_source" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="battery_technology"
+            android:summary="@string/battery_technology"
+            android:title="@string/battery_technology" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="battery_voltage"
+            android:summary="@string/battery_voltage"
+            android:title="@string/battery_voltage" />
+
+
+    </PreferenceCategory>
+
+    <!-- NOTE: EditTextPreference accepts EditText attributes. -->
+    <!-- NOTE: EditTextPreference's summary should be set to its value by the activity code. -->
+    <!--EditTextPreference
+        android:capitalize="words"
+        android:defaultValue="@string/pref_default_display_name"
+        android:inputType="textCapWords"
+        android:key="example_text"
+        android:maxLines="1"
+        android:selectAllOnFocus="true"
+        android:singleLine="true"
+        android:title="@string/pref_title_display_name" /-->
+
+    <!-- NOTE: Hide buttons to simplify the UI. Users can touch outside the dialog to
+         dismiss it. -->
+    <!-- NOTE: ListPreference's summary should be set to its value by the activity code. -->
+    <!--ListPreference
+        android:defaultValue="-1"
+        android:entries="@array/pref_example_list_titles"
+        android:entryValues="@array/pref_example_list_values"
+        android:key="example_list"
+        android:negativeButtonText="@null"
+        android:positiveButtonText="@null"
+        android:title="@string/pref_title_add_friends_to_messages" /-->
+
+</PreferenceScreen>
