@@ -240,8 +240,7 @@ public class Overlay extends Service {
         nm.notify(1, ncb.build());
     }
 
-    /**
-     * ---------------------------------------------------------------------------
+    /**---------------------------------------------------------------------------
      * A {@link View} that is extended with the overlay parameters and overlay procedures
      */
     public class DrawView extends View {
@@ -290,21 +289,8 @@ public class Overlay extends Service {
         final static String TAG="ReceiveBroadcast";
 
         /**
-         1 = Unknown - fast charge?... in case of LG G5
-         2 = Charging
-         3 = Discharging
-         4 = Not Charging
-         5 = Full
-         int status = intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1);
-         boolean isCharging = status == BatteryManager.BATTERY_STATUS_CHARGING ||
-         status == BatteryManager.BATTERY_STATUS_FULL;
-
-         int chargePlug = intent.getIntExtra(BatteryManager.EXTRA_PLUGGED, -1);
-         boolean usbCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_USB;
-         boolean acCharge = chargePlug == BatteryManager.BATTERY_PLUGGED_AC;
-
-         above api level 23 - case ACTION_CHARGING: Log.d(TAG,"charger plugged"); isBatteryCharging=true; break;
-         above api level 23 - case ACTION_DISCHARGING: Log.d(TAG,"charger unplugged"); isBatteryCharging=false; break;
+         * above api level 23 - case ACTION_CHARGING: Log.d(TAG,"charger plugged"); isBatteryCharging=true; break;
+         * above api level 23 - case ACTION_DISCHARGING: Log.d(TAG,"charger unplugged"); isBatteryCharging=false; break;
          */
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -314,10 +300,11 @@ public class Overlay extends Service {
                 case ACTION_SCREEN_OFF: if(DEBUG)Log.d(TAG,"case screen off"); break;
                 case ACTION_SCREEN_ON: if(DEBUG)Log.d(TAG,"case screen on"); break;
                 case ACTION_BATTERY_CHANGED: if(DEBUG)Log.d(TAG,"case battery changed");
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        if(DEBUG)Log.d(TAG, "BATTERY_PROPERTY_CURRENT_NOW="+Integer.toString(bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)));
-                        if(DEBUG)Log.d(TAG, "BATTERY_PROPERTY_CURRENT_AVERAGE="+Integer.toString(bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE)));
-                        if(DEBUG)Log.d(TAG, "BATTERY_PROPERTY_CHARGE_COUNTER="+Integer.toString(BATTERY_PROPERTY_CHARGE_COUNTER));
+                    if(DEBUG)
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                            Log.d(TAG, "BATTERY_PROPERTY_CURRENT_NOW="+Integer.toString(bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)));
+                            Log.d(TAG, "BATTERY_PROPERTY_CURRENT_AVERAGE="+Integer.toString(bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE)));
+                            Log.d(TAG, "BATTERY_PROPERTY_CHARGE_COUNTER="+Integer.toString(BATTERY_PROPERTY_CHARGE_COUNTER));
                     }
                 //get extra info from intent
                     eHealth = intent.getIntExtra(BatteryManager.EXTRA_HEALTH,-1);
