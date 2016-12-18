@@ -35,8 +35,10 @@ import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
  * Main Service to draw the line and set the led color
  */
 public class Overlay extends Service {
+
     final static String TAG="Overlay";
     final static boolean DEBUG=false;
+
     final static int ONMS=255;
     final static int OFFMS=0;
     final static int OPAQUE=0xff;
@@ -175,19 +177,19 @@ public class Overlay extends Service {
         if(!extraMessage.isEmpty())style.addLine("Extra:"+extraMessage);
 
         if(preferences.getBoolean("battery_percent", false))
-            style.addLine(getString(R.string.battery_percent)+" "+Integer.toString(getBatteryPercent()));
+            style.addLine(getString(R.string.battery_percent_n)+" "+Integer.toString(getBatteryPercent()));
         if(preferences.getBoolean("battery_health", false))
-            style.addLine(getString(R.string.battery_health)+" "+eHealth);
+            style.addLine(getString(R.string.battery_health_n)+" "+eHealth);
         if(preferences.getBoolean("battery_temperature", false))
-            style.addLine(getString(R.string.battery_temperature)+" " + Integer.toString(eTemperature/10) + " C°");
+            style.addLine(getString(R.string.battery_temperature_n)+" " + Integer.toString(eTemperature/10) + " C°");
         if(preferences.getBoolean("battery_status", false))
-            style.addLine(getString(R.string.battery_status)+" "+Integer.toString(eStatus));
+            style.addLine(getString(R.string.battery_status_n)+" "+Integer.toString(eStatus));
         if(preferences.getBoolean("battery_technology", false))
-            style.addLine(getString(R.string.battery_technology)+" "+eTechnology);
+            style.addLine(getString(R.string.battery_technology_n)+" "+eTechnology);
         if(preferences.getBoolean("battery_power_source", false))
-            style.addLine(getString(R.string.battery_power_source)+" " + ePlugged);
+            style.addLine(getString(R.string.battery_power_source_n)+" " + ePlugged);
         if(preferences.getBoolean("battery_voltage", false))
-            style.addLine(getString(R.string.battery_voltage)+" "+Integer.toString(eVoltage));
+            style.addLine(getString(R.string.battery_voltage_n)+" "+Integer.toString(eVoltage));
 
         int i;
         try {i = Integer.parseInt(preferences.getString("bar_thickness", "-1"));}
@@ -284,6 +286,7 @@ public class Overlay extends Service {
      * Broadcast receiver for all broadcasts
      */
     public class ReceiveBroadcast extends BroadcastReceiver {
+
         final static String TAG="ReceiveBroadcast";
 
         /**
@@ -305,7 +308,7 @@ public class Overlay extends Service {
          */
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG,"intent: "+intent.toString()+"intent extraInteger:"+Integer.toString(intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)));
+            if(DEBUG)Log.d(TAG,"intent: "+intent.toString()+"intent extraInteger:"+Integer.toString(intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)));
 
             switch (intent.getAction()) { // @formatter:off
                 case ACTION_SCREEN_OFF: if(DEBUG)Log.d(TAG,"case screen off"); break;
@@ -426,6 +429,7 @@ public class Overlay extends Service {
 
     private SharedPreferences.OnSharedPreferenceChangeListener sBindPreferenceSummaryToValueListener =
     new SharedPreferences.OnSharedPreferenceChangeListener() {
+        final static String TAG = "OnSharedPrefChgListener";
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
             if(DEBUG)Log.d(TAG, "Preference:"+sharedPreferences.toString()+" Value:"+s);

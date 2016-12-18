@@ -1,7 +1,7 @@
 <resources>
-    <string name="app_name">Evil</string>
+    <string name="app_name">Evil battery monitor</string>
     <string name="preference_file_key">pKey</string>
-    <string name="app_title">Evil a kis köcsög</string>
+    <string name="app_title">Life is good</string>
 
     <!-- Strings related to Settings -->
 
@@ -9,11 +9,13 @@
     <string name="pref_header_settings">Settings</string>
     <string name="pref_header_general">General</string>
 
-    <string name="start_on_boot">start on boot</string>
+    <string name="start_on_boot">Start on boot</string>
+    <string name="start_on_boot_s">If on, the battery monitor will be started on boot</string>
 
     <!--Battery Bar Layout -->
     <string name="bar_layout">Battery Bar Layout</string>
-    <string name="pref_bar_thickness">Battery Bar Thickness</string>
+    <string name="pref_bar_thickness">Battery bar thickness</string>
+    <string name="pref_bar_thickness_s">Battery Bar Thickness</string>
     <string-array name="pref_bar_thickness_titles">
         <item>Thin</item>
         <item>Medium Thin</item>
@@ -30,14 +32,32 @@
     </string-array>
 
 <!--Message attributes-->
-    <string name="info_in_the_message">info in the message</string>
-    <string name="battery_percent">battery percent</string>
-    <string name="battery_temperature">battery temperature</string>
-    <string name="battery_health">battery health</string>
-    <string name="battery_status">battery status</string>
-    <string name="battery_power_source">charging source</string>
-    <string name="battery_technology">battery technology</string>
-    <string name="battery_voltage">battery voltage</string>
+    <!--Settings activity keyword text-->
+    <string name="info_in_the_message">Notification Info Details</string>
+    <string name="battery_percent">Battery percent</string>
+    <string name="battery_temperature">Battery temperature</string>
+    <string name="battery_health">Battery health</string>
+    <string name="battery_status">Battery status</string>
+    <string name="battery_power_source">Charging source</string>
+    <string name="battery_technology">Battery technology</string>
+    <string name="battery_voltage">Battery voltage</string>
+    <!--Settings activity summary text-->
+    <string name="battery_percent_s">The actual battery percent</string>
+    <string name="battery_temperature_s">The actual battery temperature in C°</string>
+    <string name="battery_health_s">Battery health flag (2=OK; more info in android dok)</string>
+    <string name="battery_status_s">Battery status flag (2=charging; more info in android dok)</string>
+    <string name="battery_power_source_s">Power source flag (2=AC; more info in android dok)</string>
+    <string name="battery_technology_s">Battery technology text (Li-Ion)</string>
+    <string name="battery_voltage_s">Battery voltage in mV</string>
+    <!--Settings activity notification text-->
+    <string name="battery_percent_n">Percent</string>
+    <string name="battery_temperature_n">Temperature</string>
+    <string name="battery_health_n">Health</string>
+    <string name="battery_status_n">Status</string>
+    <string name="battery_power_source_n">Source</string>
+    <string name="battery_technology_n">Technology</string>
+    <string name="battery_voltage_n">Voltage</string>
+
 
     <string name="pref_title_social_recommendations">Enable social recommendations</string>
     <string name="pref_description_social_recommendations">Recommendations for people to contact

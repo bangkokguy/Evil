@@ -6,7 +6,7 @@
         <SwitchPreference
             android:defaultValue="true"
             android:key="start_on_boot"
-            android:summary="@string/start_on_boot"
+            android:summary="@string/start_on_boot_s"
             android:title="@string/start_on_boot" />
     </PreferenceCategory>
 
@@ -15,7 +15,7 @@
 
         <ListPreference
             android:defaultValue="16"
-            android:summary="@string/pref_bar_thickness"
+            android:summary="@string/pref_bar_thickness_s"
             android:entries="@array/pref_bar_thickness_titles"
             android:entryValues="@array/pref_bar_thickness_values"
             android:key="bar_thickness"
@@ -31,37 +31,37 @@
         <SwitchPreference
             android:defaultValue="true"
             android:key="battery_percent"
-            android:summary="@string/battery_percent"
+            android:summary="@string/battery_percent_s"
             android:title="@string/battery_percent" />
         <SwitchPreference
             android:defaultValue="true"
             android:key="battery_temperature"
-            android:summary="@string/battery_temperature"
+            android:summary="@string/battery_temperature_s"
             android:title="@string/battery_temperature" />
         <SwitchPreference
             android:defaultValue="true"
             android:key="battery_health"
-            android:summary="@string/battery_health"
+            android:summary="@string/battery_health_s"
             android:title="@string/battery_health" />
         <SwitchPreference
             android:defaultValue="true"
             android:key="battery_status"
-            android:summary="@string/battery_status"
+            android:summary="@string/battery_status_s"
             android:title="@string/battery_status" />
         <SwitchPreference
             android:defaultValue="true"
             android:key="battery_power_source"
-            android:summary="@string/battery_power_source"
+            android:summary="@string/battery_power_source_s"
             android:title="@string/battery_power_source" />
         <SwitchPreference
             android:defaultValue="true"
             android:key="battery_technology"
-            android:summary="@string/battery_technology"
+            android:summary="@string/battery_technology_s"
             android:title="@string/battery_technology" />
         <SwitchPreference
             android:defaultValue="true"
             android:key="battery_voltage"
-            android:summary="@string/battery_voltage"
+            android:summary="@string/battery_voltage_s"
             android:title="@string/battery_voltage" />
 
 
