@@ -90,10 +90,12 @@ public class Overlay extends Service {
      */
     @Override
     public void onCreate() {
-        Log.d(TAG, "OnCreate()");
+        if(DEBUG)Log.d(TAG, "OnCreate()");
 
         nm = NotificationManagerCompat.from(this);
-        bm = (BatteryManager) this.getSystemService(Context.BATTERY_SERVICE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            bm = (BatteryManager) this.getSystemService(Context.BATTERY_SERVICE);
+        }
 
         barView = initBarView(this);
         receiveBroadcast = new ReceiveBroadcast();
@@ -225,11 +227,11 @@ public class Overlay extends Service {
                                         PendingIntent.FLAG_CANCEL_CURRENT));
 
         if(isBatteryCharging) {
-            Log.d(TAG,"Battery Charging");
+            if(DEBUG)Log.d(TAG,"Battery Charging");
             ncb.setLights(argbLedColor(getBatteryPercent()), ONMS, OFFMS);
         }
         else {
-            Log.d(TAG,"Battery NOT Charging");
+            if(DEBUG)Log.d(TAG,"Battery NOT Charging");
             //nm.cancel(1);
         }
 
@@ -306,13 +308,13 @@ public class Overlay extends Service {
             Log.d(TAG,"intent: "+intent.toString()+"intent extraInteger:"+Integer.toString(intent.getIntExtra(BatteryManager.EXTRA_STATUS, -1)));
 
             switch (intent.getAction()) { // @formatter:off
-                case ACTION_SCREEN_OFF: Log.d(TAG,"case screen off"); break;
-                case ACTION_SCREEN_ON: Log.d(TAG,"case screen on"); break;
-                case ACTION_BATTERY_CHANGED: Log.d(TAG,"case battery changed");
+                case ACTION_SCREEN_OFF: if(DEBUG)Log.d(TAG,"case screen off"); break;
+                case ACTION_SCREEN_ON: if(DEBUG)Log.d(TAG,"case screen on"); break;
+                case ACTION_BATTERY_CHANGED: if(DEBUG)Log.d(TAG,"case battery changed");
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        Log.d(TAG, "BATTERY_PROPERTY_CURRENT_NOW="+Integer.toString(bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)));
-                        Log.d(TAG, "BATTERY_PROPERTY_CURRENT_AVERAGE="+Integer.toString(bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE)));
-                        Log.d(TAG, "BATTERY_PROPERTY_CHARGE_COUNTER="+Integer.toString(BATTERY_PROPERTY_CHARGE_COUNTER));
+                        if(DEBUG)Log.d(TAG, "BATTERY_PROPERTY_CURRENT_NOW="+Integer.toString(bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_NOW)));
+                        if(DEBUG)Log.d(TAG, "BATTERY_PROPERTY_CURRENT_AVERAGE="+Integer.toString(bm.getIntProperty(BatteryManager.BATTERY_PROPERTY_CURRENT_AVERAGE)));
+                        if(DEBUG)Log.d(TAG, "BATTERY_PROPERTY_CHARGE_COUNTER="+Integer.toString(BATTERY_PROPERTY_CHARGE_COUNTER));
                     }
                 //get extra info from intent
                     eHealth = intent.getIntExtra(BatteryManager.EXTRA_HEALTH,-1);
@@ -331,7 +333,7 @@ public class Overlay extends Service {
                 //at last show the notification with the actual data
                     showNotification();
                     break;
-                default: Log.d(TAG,"case default"); break;
+                default: if(DEBUG)Log.d(TAG,"case default"); break;
             } // @formatter:on
         }
     }
@@ -374,20 +376,20 @@ public class Overlay extends Service {
      */
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.d(TAG,"OnStartCommand");
+        if(DEBUG)Log.d(TAG,"OnStartCommand");
 
         SharedPreferences sharedPref = this.getSharedPreferences(
                 getString(R.string.preference_file_key), Context.MODE_PRIVATE);
 
         if (intent==null) {
-            Log.d(TAG, "null intent in StartCommand");
+            if(DEBUG)Log.d(TAG, "null intent in StartCommand");
             showOverlay = sharedPref.getBoolean("savedInstanceOverlay", false);
-            Log.d(TAG, "restore savedInstanceOverlay:"+Boolean.toString(showOverlay));
+            if(DEBUG)Log.d(TAG, "restore savedInstanceOverlay:"+Boolean.toString(showOverlay));
         }
         else {
             showOverlay=intent.getBooleanExtra("showOverlay", false);
             stopService=intent.getBooleanExtra("STOP", false);
-            Log.d(TAG, "save savedInstanceOverlay:"+Boolean.toString(showOverlay));
+            if(DEBUG)Log.d(TAG, "save savedInstanceOverlay:"+Boolean.toString(showOverlay));
             sharedPref.edit()
                     .putBoolean("savedInstanceOverlay", showOverlay)
                     .apply();
@@ -417,7 +419,7 @@ public class Overlay extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG,"OnDestroy");
+        if(DEBUG)Log.d(TAG,"OnDestroy");
         unregisterReceiver(receiveBroadcast);
         nm.cancelAll();
     }
@@ -426,7 +428,7 @@ public class Overlay extends Service {
     new SharedPreferences.OnSharedPreferenceChangeListener() {
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-            Log.d(TAG, "Preference:"+sharedPreferences.toString()+" Value:"+s);
+            if(DEBUG)Log.d(TAG, "Preference:"+sharedPreferences.toString()+" Value:"+s);
             showNotification();
         }
     };
