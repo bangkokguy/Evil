@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -14,6 +15,7 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.os.BatteryManager;
 import android.os.Build;
+import android.os.Handler;
 import android.os.IBinder;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NotificationCompat;
@@ -31,13 +33,23 @@ import static android.os.BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER;
 import static android.os.BatteryManager.BATTERY_STATUS_CHARGING;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 
+/* DONE:    1. Battery receivert ki lehet kapcsolni, ha screen off és not charging
+ * DONE:       --> nem lehet, mert akkor ha a chargert bedugják
+ * DONE:           (és nem kapcsolja be a képernyőt), nem fogja érzékelni
+ * TODO:    2. Animációt megcsinálni (bar view)
+ * TODO:    3. Tesztelni, hogy install után be van-e kapcsolva a battery bar
+ * DONE:    4. Verziót kezelni, és a message summa sorába kiírni
+ * TODO:    5. Esetleg többképernyős setup?...
+ * TODO:    6. Tesztelni, hogy miért nem kapcsol ki a led ha a telefon charge-ból discharge-ba megy
+ */
+
 /**---------------------------------------------------------------------------
  * Main Service to draw the line and set the led color
  */
 public class Overlay extends Service {
 
     final static String TAG="Overlay";
-    final static boolean DEBUG=false;
+    final static boolean DEBUG=true;
 
     final static int ONMS=255;
     final static int OFFMS=0;
@@ -48,12 +60,14 @@ public class Overlay extends Service {
     BatteryManager bm;
     WindowManager wm;
 
-    DrawView barView;
+    public DrawView barView;
     ReceiveBroadcast receiveBroadcast;
 
     int screenWidth;
     int screenHeight;
+    int loopCounter = 0;
 
+    String  versionName = "";
     boolean showOverlay;
     boolean stopService = false;
     boolean isBatteryCharging = false;
@@ -71,6 +85,11 @@ public class Overlay extends Service {
     int 	eVoltage = -1;      //the current battery voltage level
 
     SharedPreferences preferences;
+
+    Handler mHandler;
+    boolean mHandlerFree=true;
+    MyRunnable myRunnable;
+
 
     public Overlay() {
     }
@@ -94,6 +113,14 @@ public class Overlay extends Service {
     public void onCreate() {
         if(DEBUG)Log.d(TAG, "OnCreate()");
 
+        try {
+            versionName = getPackageManager().getPackageInfo(getPackageName(), 0)
+                    .versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            e.printStackTrace();
+        }
+
+
         nm = NotificationManagerCompat.from(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             bm = (BatteryManager) this.getSystemService(Context.BATTERY_SERVICE);
@@ -116,6 +143,22 @@ public class Overlay extends Service {
 
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.registerOnSharedPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
+
+        myRunnable = new MyRunnable() {};
+        myRunnable.setBarView(barView);
+        myRunnable.setContext(this);
+
+        MyRunnable.OnFinishListener onFinishListener = new MyRunnable.OnFinishListener() {
+            @Override
+            public void onFinish() {
+                mHandlerFree=true;
+                Log.d(TAG, "onFinishListener.onFinish");
+            }
+        };
+        myRunnable.setOnFinishListener(onFinishListener);
+
+        mHandler = new Handler();
+
     }
 
     /**---------------------------------------------------------------------------
@@ -135,7 +178,7 @@ public class Overlay extends Service {
             case 3: r = 255-grade;  g = 255;            b = 0;          break;//51-66 yellow_to_green    0,255:0,255
             case 4: r = 0;          g = 255;            b = grade;      break;//67-83 green_to_cyan      0:255,0,255
             case 5: r = 0;          g = 255-grade;      b = 255;        break;//84-100 cyan_to_blue
-            default:r = 255;        g = 255;            b = 255;        break;
+            default:r = 200;        g = 200;            b = 200;        break;//gray if full
         } //@formatter:on
 
         return Color.argb(OPAQUE, r, g, b);
@@ -161,6 +204,17 @@ public class Overlay extends Service {
         showNotification("");
     }
     void showNotification(String extraMessage) {
+
+        myRunnable.cancel();
+
+        if(isBatteryCharging) {
+        if(mHandlerFree)
+        {
+            mHandlerFree=false;
+            myRunnable.start();
+            myRunnable.setLoopCounter(getBatteryPercent());
+            mHandler.post(myRunnable);
+        }}
 
         barView.setColor(argbLedColor(getBatteryPercent()));
         barView.setLength(screenWidth*getBatteryPercent()/100);
@@ -196,7 +250,16 @@ public class Overlay extends Service {
             catch(NumberFormatException nfe) {i=-1;}
         if(i>-1)barView.setStrokeWidth(i);
 
-        style.setSummaryText("Battery "+Integer.toString(getBatteryPercent())+" extra:"+extraMessage+":"+Boolean.toString(isBatteryCharging));
+        style.setSummaryText(
+                "Battery "+
+                Integer.toString(getBatteryPercent())+
+                " extra:"+
+                extraMessage+
+                ":"+
+                Boolean.toString(isBatteryCharging)+
+                " ("+
+                versionName+
+                ")");
 
         NotificationCompat.Builder ncb =
                 new NotificationCompat.Builder(this)
@@ -234,6 +297,7 @@ public class Overlay extends Service {
         }
         else {
             if(DEBUG)Log.d(TAG,"Battery NOT Charging");
+            ncb.setLights(0, 0, 0);
             //nm.cancel(1);
         }
 
@@ -277,6 +341,7 @@ public class Overlay extends Service {
         @Override
         public void onDraw(Canvas canvas) {
             canvas.drawLine(0, 0, length, 0, paint);
+            /*a.start();*/
         }
 
     }
@@ -357,6 +422,7 @@ public class Overlay extends Service {
         return barView;
 
     }
+
     /**---------------------------------------------------------------------------
      * Callback if the already started service is called from outside.
      * @param intent the invoking intent (Intent)
