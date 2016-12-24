@@ -8,10 +8,10 @@ import android.util.Log;
 class MyRunnable implements Runnable {
 
     private final static String TAG="MyRunnable";
+    private final static boolean DEBUG=false;
 
     private OnFinishListener mOnFinishListener;
     private boolean isCanceled;
-    private String mMessage;
     private Overlay.DrawView barView;
     private Overlay o;
 
@@ -19,11 +19,8 @@ class MyRunnable implements Runnable {
 
     interface OnFinishListener { void onFinish(); }
 
-    boolean getCancelState() { return isCanceled; }
+    boolean isCanceled() { return isCanceled; }
     public OnFinishListener getOnFinishListener() { return mOnFinishListener; }
-    public String getMessage() { return mMessage; }
-
-    void DoStuffRequest(String message) { mMessage = message; }
     void setOnFinishListener(OnFinishListener onFinishListener) { mOnFinishListener = onFinishListener; }
     void cancel() { isCanceled = true; }
     void start() { isCanceled = false; }
@@ -38,15 +35,14 @@ class MyRunnable implements Runnable {
     }
 
     public void run() {
-        //Log.d(TAG, "run---"+Integer.toString(loopCounter++));
-        barView.setColor(o.argbLedColor(loopCounter));
+        //barView.setColor(o.argbLedColor(loopCounter));
         loopCounter=loopCounter+4;
         barView.invalidate();
-        if(loopCounter>=100)loopCounter=0;
+        if(loopCounter>=96)loopCounter=0;
         if (!isCanceled) {
-            Log.d(TAG,"myrunnable->cancel false");
-            o.mHandler.postDelayed(this, 1000);
-        } else Log.d(TAG,"myrunnable->cancel true");
+            if(DEBUG)Log.d(TAG,"myrunnable->cancel false");
+            o.mHandler.postDelayed(this, 600);
+        } else if(DEBUG)Log.d(TAG,"myrunnable->cancel true");
         notifyFinish();
     }
 }
