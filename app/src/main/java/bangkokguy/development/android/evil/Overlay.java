@@ -41,6 +41,8 @@ import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
  * DONE:    4. Verziót kezelni, és a message summa sorába kiírni
  * TODO:    5. Esetleg többképernyős setup?...
  * TODO:    6. Tesztelni, hogy miért nem kapcsol ki a led ha a telefon charge-ból discharge-ba megy
+ * TODO:    7. Kiirni a messageba, hogy mi volt az utolso leallas oka
+ * TODO:    8. mahandler a battery eventbe...
  */
 
 /**---------------------------------------------------------------------------
@@ -65,7 +67,6 @@ public class Overlay extends Service {
 
     int screenWidth;
     int screenHeight;
-    int loopCounter = 0;
 
     String  versionName = "";
     boolean showOverlay;
@@ -144,7 +145,7 @@ public class Overlay extends Service {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.registerOnSharedPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
 
-        myRunnable = new MyRunnable() {};
+        myRunnable = new MyRunnable();
         myRunnable.setBarView(barView);
         myRunnable.setContext(this);
 
@@ -157,7 +158,6 @@ public class Overlay extends Service {
         };
         myRunnable.setOnFinishListener(onFinishListener);
 
-        mHandler = new Handler();
 
     }
 
@@ -386,6 +386,8 @@ public class Overlay extends Service {
                     isBatteryCharging=(ePlugged==BATTERY_STATUS_CHARGING||ePlugged==BATTERY_STATUS_UNKNOWN);
                     isFastCharging=(ePlugged==BATTERY_STATUS_UNKNOWN);
                 //at last show the notification with the actual data
+                    if (isBatteryCharging)mHandler = new Handler(); else mHandler=null;
+
                     showNotification();
                     break;
                 default: if(DEBUG)Log.d(TAG,"case default"); break;

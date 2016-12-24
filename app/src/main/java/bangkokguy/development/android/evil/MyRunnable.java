@@ -40,12 +40,12 @@ class MyRunnable implements Runnable {
     public void run() {
         //Log.d(TAG, "run---"+Integer.toString(loopCounter++));
         barView.setColor(o.argbLedColor(loopCounter));
-        loopCounter=loopCounter+10;
+        loopCounter=loopCounter+4;
         barView.invalidate();
-        if(loopCounter==100)loopCounter=0;
+        if(loopCounter>=100)loopCounter=0;
         if (!isCanceled) {
             Log.d(TAG,"myrunnable->cancel false");
-            o.mHandler.postDelayed(this, 3600);
+            o.mHandler.postDelayed(this, 1000);
         } else Log.d(TAG,"myrunnable->cancel true");
         notifyFinish();
     }
