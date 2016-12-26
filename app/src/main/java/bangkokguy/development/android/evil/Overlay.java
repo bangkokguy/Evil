@@ -1,5 +1,6 @@
 package bangkokguy.development.android.evil;
 
+import android.annotation.SuppressLint;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -33,26 +34,27 @@ import static android.content.Intent.ACTION_SCREEN_ON;
 import static android.os.BatteryManager.BATTERY_PROPERTY_CHARGE_COUNTER;
 import static android.os.BatteryManager.BATTERY_STATUS_CHARGING;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
+import static android.support.v4.app.NotificationCompat.DEFAULT_LIGHTS;
 
 /* DONE:    1. Battery receivert ki lehet kapcsolni, ha screen off és not charging
  * DONE:       --> nem lehet, mert akkor ha a chargert bedugják
  * DONE:           (és nem kapcsolja be a képernyőt), nem fogja érzékelni
  * TODO:    2. Animációt megcsinálni (bar view)
- * TODO:    3. Tesztelni, hogy install után be van-e kapcsolva a battery bar
+ * DONE:    3. Tesztelni, hogy install után be van-e kapcsolva a battery bar
  * DONE:    4. Verziót kezelni, és a message summa sorába kiírni
  * TODO:    5. Esetleg többképernyős setup?...
- * TODO:    6. Tesztelni, hogy miért nem kapcsol ki a led ha a telefon charge-ból discharge-ba megy
- * TODO:    7. Kiirni a messageba, hogy mi volt az utolso leallas oka
- * TODO:    8. mHandler a battery eventbe...
+ * DONE:    6. Tesztelni, hogy miért nem kapcsol ki a led ha a telefon charge-ból discharge-ba megy
+ * DONE:    7. Kiirni a messageba, hogy mi volt az utolso leallas oka
+ * DONE:    8. mHandler a battery eventbe...
  */
 
 /**---------------------------------------------------------------------------
- * Main Service to draw the line and set the led color
+ * Main Service to draw the battery line and set the led color
  */
 public class Overlay extends Service {
 
     final static String TAG="Overlay";
-    final static boolean DEBUG=false;
+    final static boolean DEBUG=true;
 
     final static int ONMS=255;
     final static int OFFMS=0;
@@ -86,13 +88,13 @@ public class Overlay extends Service {
     String 	eTechnology = "";   //the technology of the current battery
     int     eTemperature = -1;  //the current battery temperature
     int 	eVoltage = -1;      //the current battery voltage level
+    boolean	eLEDon = false;     //whether use led or not
 
     SharedPreferences preferences;
     SharedPreferences sharedPref;
 
     Handler mHandler;
     MyRunnable myRunnable;
-    boolean mHandlerFree=true;
 
     public Overlay() {
     }
@@ -116,6 +118,10 @@ public class Overlay extends Service {
     public void onCreate() {
         if(DEBUG)Log.d(TAG, "OnCreate()");
 
+        mHandler = new Handler();
+        myRunnable = new MyRunnable();
+        myRunnable.setContext(this);
+
         try {
             versionName = getPackageManager().getPackageInfo(getPackageName(), 0)
                     .versionName;
@@ -126,14 +132,13 @@ public class Overlay extends Service {
         sharedPref = this.getSharedPreferences(
                 getString(R.string.preference_file_key), Context.MODE_PRIVATE);
 
-        stopCode = sharedPref.getString("stop_code", "");
-
         nm = NotificationManagerCompat.from(this);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             bm = (BatteryManager) this.getSystemService(Context.BATTERY_SERVICE);
         }
 
         barView = initBarView(this);
+        myRunnable.setBarView(barView);
         receiveBroadcast = new ReceiveBroadcast();
 
         this.registerReceiver(
@@ -151,11 +156,6 @@ public class Overlay extends Service {
         preferences = PreferenceManager.getDefaultSharedPreferences(this);
         preferences.registerOnSharedPreferenceChangeListener(sBindPreferenceSummaryToValueListener);
 
-        mHandler = new Handler();
-        myRunnable = new MyRunnable();
-        myRunnable.setBarView(barView);
-        myRunnable.setContext(this);
-
         MyRunnable.OnFinishListener onFinishListener = new MyRunnable.OnFinishListener() {
             @Override
             public void onFinish() {
@@ -164,7 +164,6 @@ public class Overlay extends Service {
                     barView.setLength(screenWidth*getBatteryPercent()/100);
                     barView.invalidate();
                 }
-                if(DEBUG)Log.d(TAG, "onFinishListener.onFinish");
             }
         };
         myRunnable.setOnFinishListener(onFinishListener);
@@ -217,14 +216,15 @@ public class Overlay extends Service {
     void showNotification(String extraMessage) {
 
         myRunnable.cancel();
+        barView.setColor(argbLedColor(getBatteryPercent()));
+        barView.setLength(screenWidth*getBatteryPercent()/100);
+
         if(isBatteryCharging) {
             mHandler.removeCallbacks(myRunnable);
             myRunnable.start();
-            myRunnable.setLoopCounter(getBatteryPercent());
             mHandler.post(myRunnable);
-        } else barView.setColor(argbLedColor(getBatteryPercent()));
+        }
 
-        barView.setLength(screenWidth*getBatteryPercent()/100);
         barView.invalidate();
 
         String actionText = showOverlay ? "STOP" : "START";
@@ -251,6 +251,8 @@ public class Overlay extends Service {
             style.addLine(getString(R.string.battery_power_source_n)+" " + ePlugged);
         if(preferences.getBoolean("battery_voltage", false))
             style.addLine(getString(R.string.battery_voltage_n)+" "+Integer.toString(eVoltage));
+
+        eLEDon = preferences.getBoolean("led_on", false);
 
         int i;
         try {i = Integer.parseInt(preferences.getString("bar_thickness", "-1"));}
@@ -300,15 +302,17 @@ public class Overlay extends Service {
                                                 .putExtra("STOP", true),
                                         PendingIntent.FLAG_CANCEL_CURRENT));
 
-        if((isBatteryCharging) || (getBatteryPercent()<=15)){
-            if(DEBUG)Log.d(TAG,"Battery Charging or low");
-            ncb.setLights(argbLedColor(getBatteryPercent()), ONMS, OFFMS);
-        }
-        else {
-            if(DEBUG)Log.d(TAG,"Battery NOT Charging");
-            ncb.setLights(Color.argb(255,0,0,0), 255, 0);
-            //nm.cancel(1);
-        }
+        if (eLEDon)
+            if((isBatteryCharging) || (getBatteryPercent()<=15)){
+                if(DEBUG)Log.d(TAG,"Battery Charging or low");
+                ncb.setLights(argbLedColor(getBatteryPercent()), ONMS, OFFMS);
+            }
+            else {
+                if(DEBUG)Log.d(TAG,"Battery NOT Charging and not low");
+                //turn on "black" LED (this is the only possibility to turn off led in LG G5
+                ncb.setLights(Color.argb(255,0,0,0), 255, 0);
+                ncb.setDefaults(DEFAULT_LIGHTS);
+            }
 
         nm.notify(1, ncb.build());
     }
@@ -318,56 +322,60 @@ public class Overlay extends Service {
      */
     public class DrawView extends View {
         Paint paint, p;
-        int length;
+        int barLength;
 
         public DrawView(Context context, int argb, int length) {
             this(context, argb, length, MAX_STROKE_WIDTH);
         }
 
-        public DrawView(Context context, int argb, int length, int strokeWidth) {
+        public DrawView(Context context, int argb, int barLength, int strokeWidth) {
             super(context);
             paint = new Paint();
-            p = new Paint();
             paint.setStyle(Paint.Style.FILL);
             paint.setStyle(Paint.Style.STROKE);
-            setColor(argb);
-            setLength(length);
+            paint.setColor(argb);
+            paint.setStrokeWidth(strokeWidth);
+            setLength(barLength);
             setBackgroundColor(Color.TRANSPARENT);
-            setStrokeWidth(strokeWidth);
+
+            p = new Paint();
+            p.setStyle(Paint.Style.FILL);
+            p.setStyle(Paint.Style.STROKE);
+            p.setStrokeWidth(strokeWidth);
+            p.setColor(Color.argb(255, 255, 0, 0)); //RED
+
         }
 
         public void setColor(int argb) {
             paint.setColor(argb);
         }
 
-        public void setLength(int length) {
-            this.length=length;
+        public void setLength(int barLength) {
+            this.barLength=barLength;
         }
 
         public void setStrokeWidth(int strokeWidth){
             paint.setStrokeWidth(strokeWidth);
         }
 
-        int a = 0x00ff;
-        int mask = 0x00ff;
-        static final int len = 48;
-        int offset = 0;
+        static final int LEN = 64;
+        static final int STEP = 32;
+        int from = 0;
+        int to;
 
         @Override
         public void onDraw(Canvas canvas) {
-            if(isBatteryCharging){
-                a = 0x00ff;
-                p = paint;
-                for (int i=0; i<length/len; i++) {
-                    p.setAlpha(a);
-                    canvas.drawLine(i*len+offset, 0, i*len+offset+len-1, 0, paint);
-                    a = (a ^ mask);
+            canvas.drawLine(0, 0, barLength, 0, paint);
+            if(isBatteryCharging) {
+                from = from + STEP;
+                to = from + LEN;
+                if(to>barLength){
+                    from = 0;
+                } else {
+                    canvas.drawLine(from, 0, to, 0, p);
+                    //Log.d(TAG, "from, to:"+Integer.toString(from)+", "+Integer.toString(to));
                 }
-                offset=offset+16;
-                if(offset==len)offset=0;
-                //a = (a ^ mask);
-
-            } else canvas.drawLine(0, 0, length, 0, paint);
+            }
         }
     }
 
@@ -456,6 +464,7 @@ public class Overlay extends Service {
      * @param startId as defined in the android documentation (int)
      * @return the Service type as described in the android documentation (int)
      */
+    @SuppressLint("CommitPrefEdits")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if(DEBUG)Log.d(TAG,"OnStartCommand");
@@ -474,6 +483,11 @@ public class Overlay extends Service {
                     .apply();
         }
 
+        stopCode = sharedPref.getString("stop_code", "");
+        //to prevent misleading information, clear the stop code
+        sharedPref.edit().putString("stop_code","")
+                .commit();
+
         if(stopService)stopSelf();
 
         if (showOverlay)barView.setVisibility(View.VISIBLE);
@@ -491,18 +505,18 @@ public class Overlay extends Service {
      */
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
+        // DONE: Return the communication channel to the service. --- not used here
         throw new UnsupportedOperationException("Not yet implemented");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if(DEBUG)Log.d(TAG,"OnDestroy");
+        if(DEBUG)Log.d(TAG,"destroyed");
         unregisterReceiver(receiveBroadcast);
         nm.cancelAll();
         sharedPref.edit()
-            .putString("stop_code", "onDestroyed")
+            .putString("stop_code", "destroyed")
             .apply();
         mHandler = null;
         myRunnable = null;
@@ -513,7 +527,7 @@ public class Overlay extends Service {
     public void onLowMemory() {
         super.onLowMemory();
         sharedPref.edit()
-                .putString("stop_code", "onLowMemory")
+                .putString("stop_code", "low memory")
                 .apply();
 
     }
@@ -522,7 +536,7 @@ public class Overlay extends Service {
     public void onTaskRemoved(Intent rootIntent) {
         super.onTaskRemoved(rootIntent);
         sharedPref.edit()
-                .putString("stop_code", "onTaskRemoved")
+                .putString("stop_code", "task removed")
                 .apply();
     }
 
@@ -530,7 +544,7 @@ public class Overlay extends Service {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         sharedPref.edit()
-                .putString("stop_code", "onConfigurationChanged")
+                .putString("stop_code", "config changed")
                 .apply();
     }
 
