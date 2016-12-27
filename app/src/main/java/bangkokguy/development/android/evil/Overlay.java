@@ -1,6 +1,7 @@
 package bangkokguy.development.android.evil;
 
 import android.annotation.SuppressLint;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
 import android.content.BroadcastReceiver;
@@ -36,16 +37,17 @@ import static android.os.BatteryManager.BATTERY_STATUS_CHARGING;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import static android.support.v4.app.NotificationCompat.DEFAULT_LIGHTS;
 
-/* DONE:    1. Battery receivert ki lehet kapcsolni, ha screen off és not charging
- * DONE:       --> nem lehet, mert akkor ha a chargert bedugják
- * DONE:           (és nem kapcsolja be a képernyőt), nem fogja érzékelni
- * TODO:    2. Animációt megcsinálni (bar view)
- * DONE:    3. Tesztelni, hogy install után be van-e kapcsolva a battery bar
- * DONE:    4. Verziót kezelni, és a message summa sorába kiírni
- * TODO:    5. Esetleg többképernyős setup?...
- * DONE:    6. Tesztelni, hogy miért nem kapcsol ki a led ha a telefon charge-ból discharge-ba megy
- * DONE:    7. Kiirni a messageba, hogy mi volt az utolso leallas oka
- * DONE:    8. mHandler a battery eventbe...
+/* DONE:    Battery receivert ki lehet kapcsolni, ha screen off és not charging
+ *            --> nem lehet, mert akkor ha a chargert bedugják
+ *            (és nem kapcsolja be a képernyőt), nem fogja érzékelni
+ * DONE:    Animációt megcsinálni (bar view)
+ * DONE:    Tesztelni, hogy install után be van-e kapcsolva a battery bar
+ * DONE:    Verziót kezelni, és a message summa sorába kiírni
+ * NextRel.:Esetleg többképernyős setup?...
+ * DONE:    Tesztelni, hogy miért nem kapcsol ki a led ha a telefon charge-ból discharge-ba megy
+ * DONE:    Kiirni a messageba, hogy mi volt az utolso leallas oka
+ * DONE:    mHandler a battery eventbe...
+ * NextRel.:Battery bar process animation color should depend on bar color
  */
 
 /**---------------------------------------------------------------------------
@@ -314,7 +316,12 @@ public class Overlay extends Service {
                 ncb.setDefaults(DEFAULT_LIGHTS);
             }
 
-        nm.notify(1, ncb.build());
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
+            Notification noti = ncb.build();
+            //nm.notify(1, noti);
+            startForeground(1, noti);
+        }
+        else nm.notify(1, ncb.build());
     }
 
     /**---------------------------------------------------------------------------
@@ -356,11 +363,12 @@ public class Overlay extends Service {
 
         public void setStrokeWidth(int strokeWidth){
             paint.setStrokeWidth(strokeWidth);
+            p.setStrokeWidth(strokeWidth);
         }
 
         static final int LEN = 64;
         static final int STEP = 32;
-        int from = 0;
+        int from = STEP * -1;
         int to;
 
         @Override
@@ -370,7 +378,7 @@ public class Overlay extends Service {
                 from = from + STEP;
                 to = from + LEN;
                 if(to>barLength){
-                    from = 0;
+                    from = STEP * -1;
                 } else {
                     canvas.drawLine(from, 0, to, 0, p);
                     //Log.d(TAG, "from, to:"+Integer.toString(from)+", "+Integer.toString(to));
