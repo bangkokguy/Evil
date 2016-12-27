@@ -37,17 +37,10 @@ import static android.os.BatteryManager.BATTERY_STATUS_CHARGING;
 import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import static android.support.v4.app.NotificationCompat.DEFAULT_LIGHTS;
 
-/* DONE:    Battery receivert ki lehet kapcsolni, ha screen off és not charging
- *            --> nem lehet, mert akkor ha a chargert bedugják
- *            (és nem kapcsolja be a képernyőt), nem fogja érzékelni
- * DONE:    Animációt megcsinálni (bar view)
- * DONE:    Tesztelni, hogy install után be van-e kapcsolva a battery bar
- * DONE:    Verziót kezelni, és a message summa sorába kiírni
- * NextRel.:Esetleg többképernyős setup?...
- * DONE:    Tesztelni, hogy miért nem kapcsol ki a led ha a telefon charge-ból discharge-ba megy
- * DONE:    Kiirni a messageba, hogy mi volt az utolso leallas oka
- * DONE:    mHandler a battery eventbe...
- * NextRel.:Battery bar process animation color should depend on bar color
+/*
+ * TODO:Esetleg többképernyős setup?...
+ * TODO:Battery bar process animation color should depend on bar color
+ * NextRel.:Change bar length on screen orientation
  */
 
 /**---------------------------------------------------------------------------
