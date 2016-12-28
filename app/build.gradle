@@ -7,8 +7,8 @@ android {
         applicationId "bangkokguy.development.android.evil"
         minSdkVersion 14
         targetSdkVersion 24
-        versionCode 1
-        versionName "Walter White"
+        versionCode 2
+        versionName "Skyler White"
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
     }
     buildTypes {

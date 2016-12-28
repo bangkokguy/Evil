@@ -39,7 +39,10 @@ import static android.support.v4.app.NotificationCompat.DEFAULT_LIGHTS;
 
 /*
  * TODO:Esetleg többképernyős setup?...
- * TODO:Battery bar process animation color should depend on bar color
+ * DONE:Battery bar process animation color should depend on bar color
+ * TODO:Play sound if charged
+ * TODO:Play sound if discharged
+ * TODO:Make sound optional via settings
  * NextRel.:Change bar length on screen orientation
  */
 
@@ -342,12 +345,13 @@ public class Overlay extends Service {
             p.setStyle(Paint.Style.FILL);
             p.setStyle(Paint.Style.STROKE);
             p.setStrokeWidth(strokeWidth);
-            p.setColor(Color.argb(255, 255, 0, 0)); //RED
+            //p.setColor(argbLedColor(100-getBatteryPercent());// Color.argb(255, 255, 0, 0)); RED
 
         }
 
         public void setColor(int argb) {
             paint.setColor(argb);
+            p.setColor((0xFFFFFF - argb) | 0xFF000000);
         }
 
         public void setLength(int barLength) {
