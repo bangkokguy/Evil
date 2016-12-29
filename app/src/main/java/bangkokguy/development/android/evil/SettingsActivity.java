@@ -192,17 +192,12 @@ public class SettingsActivity extends AppCompatPreferenceActivity {
             // Bind the summaries of EditText/List/Dialog/Ringtone preferences
             // to their values. When their values change, their summaries are
             // updated to reflect the new value, per the Android Design
-            // guidelines.
-            //bindPreferenceSummaryToValue(findPreference("start_on_boot"));
+            // guidelines. No boolean values are bound.
             bindPreferenceSummaryToValue(findPreference("bar_thickness"));
-            //bindPreferenceSummaryToValue(findPreference("battery_percent"));
-            //bindPreferenceSummaryToValue(findPreference("battery_temperature"));
-            //bindPreferenceSummaryToValue(findPreference("battery_health"));
-            //bindPreferenceSummaryToValue(findPreference("battery_status"));
-            //bindPreferenceSummaryToValue(findPreference("battery_power_source"));
-            //bindPreferenceSummaryToValue(findPreference("battery_technology"));
-            //bindPreferenceSummaryToValue(findPreference("battery_voltage"));
-
+            bindPreferenceSummaryToValue(findPreference("battery_full_sound"));
+            bindPreferenceSummaryToValue(findPreference("battery_empty_sound"));
+            bindPreferenceSummaryToValue(findPreference("repeat_battery_full_sound"));
+            bindPreferenceSummaryToValue(findPreference("repeat_battery_empty_sound"));
         }
 
         @Override

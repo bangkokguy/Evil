@@ -17,6 +17,47 @@
     </PreferenceCategory>
 
     <PreferenceCategory
+        android:title="@string/battery_sound">
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="play_battery_full_sound"
+            android:title="@string/play_battery_full_sound" />
+        <!--android:summary="@string/play_battery_full_sound_s"-->
+        <RingtonePreference
+            android:dependency="play_battery_full_sound"
+            android:key="battery_full_sound"
+            android:summary="@string/battery_full_sound_s"
+            android:title="@string/battery_full_sound" />
+        <EditTextPreference
+            android:dependency="play_battery_full_sound"
+            android:defaultValue="1"
+            android:inputType="number"
+            android:key="repeat_battery_full_sound"
+            android:summary="@string/repeat_battery_full_sound_s"
+            android:title="@string/repeat_battery_full_sound" />
+
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="play_battery_empty_sound"
+            android:title="@string/play_battery_empty_sound" />
+            <!--android:summary="@string/play_battery_empty_sound_s"-->
+        <RingtonePreference
+            android:dependency="play_battery_empty_sound"
+            android:key="battery_empty_sound"
+            android:summary="@string/battery_empty_sound_s"
+            android:title="@string/battery_empty_sound" />
+        <EditTextPreference
+            android:dependency="play_battery_empty_sound"
+            android:defaultValue="1"
+            android:inputType="number"
+            android:key="repeat_battery_empty_sound"
+            android:summary="@string/repeat_battery_empty_sound_s"
+            android:title="@string/repeat_battery_empty_sound" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
         android:title="@string/bar_layout">
 
         <ListPreference

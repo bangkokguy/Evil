@@ -16,6 +16,8 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.os.BatteryManager;
 import android.os.Build;
 import android.os.Handler;
@@ -38,12 +40,13 @@ import static android.os.BatteryManager.BATTERY_STATUS_UNKNOWN;
 import static android.support.v4.app.NotificationCompat.DEFAULT_LIGHTS;
 
 /*
- * TODO:Esetleg többképernyős setup?...
+ * TODO:Multipane setup
  * DONE:Battery bar process animation color should depend on bar color
- * TODO:Play sound if charged
- * TODO:Play sound if discharged
- * TODO:Make sound optional via settings
- * NextRel.:Change bar length on screen orientation
+ * DONE:Play sound if charged
+ * DONE:Play sound if discharged
+ * DONE:Make sound optional via settings
+ * TODO:Change bar length on screen orientation
+ * TODO:Battery bar process marker animation should be refined on the edges of the bar
  */
 
 /**---------------------------------------------------------------------------
@@ -203,6 +206,14 @@ public class Overlay extends Service {
             return eLevel;
     }
 
+    static int BATTERY_FULL=96;
+    boolean playSoundIfBatteryFull=false;
+    int batteryFullSoundPlayedCount=0;
+    int maxNumberOfBatteryFullSoundPlayed=1;
+    boolean playSoundIfBatteryEmpty=false;
+    int batteryEmptySoundPlayedCount=0;
+    int maxNumberOfBatteryEmptySoundPlayed=1;
+
     /**---------------------------------------------------------------------------
      * Shows a sticky notification. This one will be changed every time the os invokes
      * the battery changed event listener. The LED color will be
@@ -300,6 +311,36 @@ public class Overlay extends Service {
                                                 .putExtra("STOP", true),
                                         PendingIntent.FLAG_CANCEL_CURRENT));
 
+        //The following part could be in "OnCreate()".
+        //In that case the values should be changed every time, whenever preferences had been changed.
+        //But this is not a frequently called function, therefore easier implemented here.
+        playSoundIfBatteryFull = preferences.getBoolean("play_battery_full_sound", false);
+        playSoundIfBatteryEmpty = preferences.getBoolean("play_battery_empty_sound", false);
+        maxNumberOfBatteryFullSoundPlayed = Integer.parseInt(preferences.getString("repeat_battery_full_sound", "1"));
+        maxNumberOfBatteryEmptySoundPlayed = Integer.parseInt(preferences.getString("repeat_battery_empty_sound", "1"));
+        //---
+
+        if(isBatteryCharging) {
+            batteryEmptySoundPlayedCount = 0; //Instead here, it could  be set in Battery Event Receiver
+            if ((getBatteryPercent() >= BATTERY_FULL)
+                    && (playSoundIfBatteryFull)
+                    && (batteryFullSoundPlayedCount++ <= maxNumberOfBatteryFullSoundPlayed)) {
+                ncb.setSound(Uri.parse(preferences.getString(
+                        "battery_full_sound",
+                        RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION).toString())));
+            } else {
+                if ((getBatteryPercent() >= BATTERY_FULL)
+                        && (playSoundIfBatteryEmpty)
+                        && (batteryEmptySoundPlayedCount++ <= maxNumberOfBatteryEmptySoundPlayed)) {
+                    ncb.setSound(Uri.parse(preferences.getString(
+                            "battery_empty_sound",
+                            RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION).toString())));
+                }
+            }
+        } else {
+            batteryFullSoundPlayedCount = 0; //Instead here, it could  be set in Battery Event Receiver
+        }
+
         if (eLEDon)
             if((isBatteryCharging) || (getBatteryPercent()<=15)){
                 if(DEBUG)Log.d(TAG,"Battery Charging or low");
@@ -314,14 +355,14 @@ public class Overlay extends Service {
 
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP) {
             Notification noti = ncb.build();
-            //nm.notify(1, noti);
             startForeground(1, noti);
         }
         else nm.notify(1, ncb.build());
     }
 
-    /**---------------------------------------------------------------------------
-     * A {@link View} that is extended with the overlay parameters and overlay procedures
+    /**
+     * ---------------------------------------------------------------------------
+     * A {@link View} which is extended with the overlay parameters and overlay procedures
      */
     public class DrawView extends View {
         Paint paint, p;
@@ -334,19 +375,17 @@ public class Overlay extends Service {
         public DrawView(Context context, int argb, int barLength, int strokeWidth) {
             super(context);
             paint = new Paint();
+            p = new Paint();
+
             paint.setStyle(Paint.Style.FILL);
             paint.setStyle(Paint.Style.STROKE);
-            paint.setColor(argb);
-            paint.setStrokeWidth(strokeWidth);
-            setLength(barLength);
-            setBackgroundColor(Color.TRANSPARENT);
-
-            p = new Paint();
             p.setStyle(Paint.Style.FILL);
             p.setStyle(Paint.Style.STROKE);
-            p.setStrokeWidth(strokeWidth);
-            //p.setColor(argbLedColor(100-getBatteryPercent());// Color.argb(255, 255, 0, 0)); RED
 
+            setColor(argb);
+            setStrokeWidth(strokeWidth);
+            setLength(barLength);
+            setBackgroundColor(Color.TRANSPARENT);
         }
 
         public void setColor(int argb) {
@@ -374,6 +413,9 @@ public class Overlay extends Service {
             if(isBatteryCharging) {
                 from = from + STEP;
                 to = from + LEN;
+                /* if from>barlength then from = STEP* -1 (???);
+                   if to > barlength then to = barlength--> in this case process marker should be drawn at the beginning of the bar too
+                  */
                 if(to>barLength){
                     from = STEP * -1;
                 } else {
