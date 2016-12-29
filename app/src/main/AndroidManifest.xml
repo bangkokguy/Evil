@@ -18,8 +18,20 @@
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter android:label="@string/filter_title_evil">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
 
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <data android:scheme="http"
+                      android:host="www.bangkokguy.tk"
+                      android:pathPrefix="/evil" />
+                <!-- note that the leading "/" is required for pathPrefix-->
+                <!-- Accepts URIs that begin with "example://bangkokguy” -->
+                <data android:scheme="example"
+                      android:host="bangkokguy" />
             </intent-filter>
         </activity>
 

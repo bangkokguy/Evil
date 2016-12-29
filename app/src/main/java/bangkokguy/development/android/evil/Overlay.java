@@ -47,6 +47,8 @@ import static android.support.v4.app.NotificationCompat.DEFAULT_LIGHTS;
  * DONE:Make sound optional via settings
  * TODO:Change bar length on screen orientation
  * TODO:Battery bar process marker animation should be refined on the edges of the bar
+ * TODO:Change summary text
+ * TODO:Change Notification Title
  */
 
 /**---------------------------------------------------------------------------
@@ -168,8 +170,6 @@ public class Overlay extends Service {
             }
         };
         myRunnable.setOnFinishListener(onFinishListener);
-
-
     }
 
     /**---------------------------------------------------------------------------
@@ -207,9 +207,12 @@ public class Overlay extends Service {
     }
 
     static int BATTERY_FULL=96;
+    static int BATTERY_EMPTY=15;
+
     boolean playSoundIfBatteryFull=false;
     int batteryFullSoundPlayedCount=0;
     int maxNumberOfBatteryFullSoundPlayed=1;
+
     boolean playSoundIfBatteryEmpty=false;
     int batteryEmptySoundPlayedCount=0;
     int maxNumberOfBatteryEmptySoundPlayed=1;
@@ -268,7 +271,7 @@ public class Overlay extends Service {
             catch(NumberFormatException nfe) {i=-1;}
         if(i>-1)barView.setStrokeWidth(i);
 
-        style.setSummaryText(
+        /*style.setSummaryText(
                 "Battery "+
                 Integer.toString(getBatteryPercent())+
                 ":"+
@@ -279,7 +282,12 @@ public class Overlay extends Service {
                 Boolean.toString(isBatteryCharging)+
                 " ("+
                 versionName+
-                ")");
+                ")");*/
+        String extra = isBatteryCharging ? "Battery is currently charging." : "Battery is discharging.";
+        style.setSummaryText(
+                extra +
+                " Version: "+
+                versionName);
 
         NotificationCompat.Builder ncb =
                 new NotificationCompat.Builder(this)
@@ -329,7 +337,7 @@ public class Overlay extends Service {
                         "battery_full_sound",
                         RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION).toString())));
             } else {
-                if ((getBatteryPercent() >= BATTERY_FULL)
+                if ((getBatteryPercent() <= BATTERY_EMPTY)
                         && (playSoundIfBatteryEmpty)
                         && (batteryEmptySoundPlayedCount++ <= maxNumberOfBatteryEmptySoundPlayed)) {
                     ncb.setSound(Uri.parse(preferences.getString(

@@ -1,7 +1,8 @@
 <resources>
     <string name="app_name">Evil battery monitor</string>
     <string name="preference_file_key">pKey</string>
-    <string name="app_title">Life is good</string>
+    <string name="app_title">Evil battery monitor</string>
+    <string name="filter_title_evil">Evil battery monitor</string>
 
     <!-- Strings related to Settings -->
 
@@ -72,13 +73,13 @@
     <string name="battery_technology_s">Battery technology text (Li-Ion)</string>
     <string name="battery_voltage_s">Battery voltage in mV</string>
     <!--Settings activity notification text-->
-    <string name="battery_percent_n">Percent</string>
-    <string name="battery_temperature_n">Temperature</string>
-    <string name="battery_health_n">Health</string>
-    <string name="battery_status_n">Status</string>
-    <string name="battery_power_source_n">Source</string>
-    <string name="battery_technology_n">Technology</string>
-    <string name="battery_voltage_n">Voltage</string>
+    <string name="battery_percent_n">Battery Percent</string>
+    <string name="battery_temperature_n">Battery Temperature</string>
+    <string name="battery_health_n">Battery Health</string>
+    <string name="battery_status_n">Battery Status</string>
+    <string name="battery_power_source_n">Charging Source</string>
+    <string name="battery_technology_n">Battery Technology</string>
+    <string name="battery_voltage_n">Battery Voltage</string>
 
 
     <string name="pref_title_social_recommendations">Enable social recommendations</string>
