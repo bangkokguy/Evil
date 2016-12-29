@@ -47,8 +47,8 @@ import static android.support.v4.app.NotificationCompat.DEFAULT_LIGHTS;
  * DONE:Make sound optional via settings
  * TODO:Change bar length on screen orientation
  * TODO:Battery bar process marker animation should be refined on the edges of the bar
- * TODO:Change summary text
- * TODO:Change Notification Title
+ * DONE:Change summary text
+ * DONE:Change Notification Title
  */
 
 /**---------------------------------------------------------------------------
