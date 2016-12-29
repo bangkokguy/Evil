@@ -9,7 +9,7 @@
 
     <application
         android:allowBackup="true"
-        android:icon="@mipmap/evil"
+        android:icon="@mipmap/evil_128"
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
